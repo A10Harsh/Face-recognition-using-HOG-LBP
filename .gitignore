@@ -1,0 +1,70 @@
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Python cache and bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Jupyter
+.ipynb_checkpoints
+
+# Logs and databases
+*.log
+*.sqlite3
+
+# Environment and secret files
+.env
+.env.*
+secrets.json
+credentials.json
+*.pem
+*.key
+
+# Data, models and large outputs (do not push datasets or weights)
+data/
+datasets/
+raw_data/
+processed_data/
+models/
+checkpoints/
+weights/
+results/
+output/
+logs/
+*.h5
+*.pt
+*.pth
+*.ckpt
+
+# Build and distribution
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Temporary and backup files
+*.bak
+*.tmp
+*.swp
+
+# Compiled binaries
+*.class
+*.o
+*.so
+*.dll
+*.exe
