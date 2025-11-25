@@ -73,7 +73,7 @@ def histogram_from_uploaded_image(img_array):
 
 # ----------------------------- Streamlit App -----------------------------
 st.set_page_config(page_title="Face Matcher with LBP + FAISS", layout="centered")
-st.title("🔍 Face Image Similarity Search")
+st.title(" Face Image Similarity Search")
 st.write("Upload a face image to find the most similar entry in the vector store.")
 
 # Load FAISS vector store
@@ -82,9 +82,9 @@ embedding_model = PrecomputedEmbedding()
 
 try:
     faiss_store = FAISS.load_local("lbp_faiss_index", embedding_model, allow_dangerous_deserialization=True)
-    st.success("✅ FAISS index loaded successfully.")
+    st.success(" FAISS index loaded successfully.")
 except Exception as e:
-    st.error(f"❌ Failed to load FAISS index: {e}")
+    st.error(f" Failed to load FAISS index: {e}")
     st.stop()
 
 # Image upload
