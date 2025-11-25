@@ -12,9 +12,7 @@ from sklearn.metrics import classification_report, accuracy_score, confusion_mat
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-# -----------------------------------------------------------------------------
-# --- 1. COPY ALL HELPER FUNCTIONS FROM YOUR STREAMLIT APP ---
-# -----------------------------------------------------------------------------
+
 
 def apply_clahe(image):
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
@@ -74,9 +72,6 @@ def l2_to_similarity(distance, max_distance=2.0):
     similarity = (similarity - 0.999) * 1000
     return similarity
 
-# -----------------------------------------------------------------------------
-# --- 2. NEW BATCH PROCESSING & EVALUATION LOGIC ---
-# -----------------------------------------------------------------------------
 
 def histogram_from_image_path(img_path):
     """
@@ -151,11 +146,11 @@ def evaluate_identification(dataset, embedding_model):
         print("Could not process any probe images. Cannot calculate metrics.")
         return
 
-    print(f"✅ Overall Accuracy: {accuracy_score(y_true_filtered, y_pred_filtered):.2%}\n")
-    print("📊 Classification Report:")
+    print(f"Overall Accuracy: {accuracy_score(y_true_filtered, y_pred_filtered):.2%}\n")
+    print("Classification Report:")
     print(classification_report(y_true_filtered, y_pred_filtered, zero_division=0))
     
-    print("📊 Confusion Matrix:")
+    print("Confusion Matrix:")
     labels = sorted(list(dataset.keys()))
     cm = confusion_matrix(y_true_filtered, y_pred_filtered, labels=labels)
     plt.figure(figsize=(12, 10))
@@ -207,14 +202,12 @@ def evaluate_verification(dataset, threshold=0.82):
     far = false_acceptances / len(imposter_pairs) if imposter_pairs else 0
 
     print("\n--- Verification Results ---")
-    print(f"🔴 False Rejections (FR): {false_rejections} out of {len(genuine_pairs)}")
-    print(f"🔴 False Acceptances (FA): {false_acceptances} out of {len(imposter_pairs)}")
-    print(f"📈 False Rejection Rate (FNR): {fnr:.2%}")
-    print(f"📈 False Acceptance Rate (FAR): {far:.2%}")
+    print(f"False Rejections (FR): {false_rejections} out of {len(genuine_pairs)}")
+    print(f" False Acceptances (FA): {false_acceptances} out of {len(imposter_pairs)}")
+    print(f"False Rejection Rate (FNR): {fnr:.2%}")
+    print(f" False Acceptance Rate (FAR): {far:.2%}")
 
-# -----------------------------------------------------------------------------
-# --- 3. MAIN EXECUTION BLOCK ---
-# -----------------------------------------------------------------------------
+
 if __name__ == "__main__":
     # IMPORTANT: Set this path to your dataset folder.
     DATASET_PATH = "dataset" # <--- CONFIGURE THIS
