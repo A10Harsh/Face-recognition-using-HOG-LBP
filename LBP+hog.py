@@ -10,7 +10,7 @@ import uuid
 import os
 import shutil
 
-# ----------------------------- HOG Feature Extraction -----------------------------
+
 def extract_hog_features(image):
     if image is None:
         return None
@@ -29,12 +29,12 @@ def extract_hog_features(image):
                    feature_vector=True)
     return features
 
-# ----------------------------- CLAHE -----------------------------
+
 def apply_clahe(image):
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
     return clahe.apply(image)
 
-# ----------------------------- Retinex -----------------------------
+
 def apply_retinex(image):
     image = image.astype(np.float32) + 1.0
     gaussian = cv2.GaussianBlur(image, (101, 101), 30)
@@ -43,7 +43,7 @@ def apply_retinex(image):
     return np.uint8(retinex)
     
 
-# ----------------------------- Face Detection -----------------------------
+
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
 
 def detect_and_crop_face(img):
@@ -53,7 +53,6 @@ def detect_and_crop_face(img):
     (x, y, w, h) = faces[0]
     return img[y:y+h, x:x+w]
 
-# ----------------------------- ENHANCED LBP Extraction -----------------------------
 def extract_lbp_from_cropped_face(cropped, grid_x=8, grid_y=8):
     if cropped is None:
         return None
@@ -82,21 +81,20 @@ def extract_lbp_from_cropped_face(cropped, grid_x=8, grid_y=8):
     final_hist /= (final_hist.sum() + 1e-6)
     return final_hist
 
-# ----------------------------- Custom Embedding Wrapper -----------------------------
+
 class PrecomputedEmbedding(Embeddings):
     def embed_documents(self, texts):
         return []
     def embed_query(self, text):
         return []
 
-# ----------------------------- Similarity Conversion -----------------------------
 def l2_to_similarity(distance, max_distance=2.0):
     similarity = max(0.0, 1 - (distance / max_distance))
     # Adjust this scaling factor as needed for the new combined vectors
     print(similarity)
     return similarity * 100
 
-# ✅ Utility function to get all stored metadata
+
 def get_all_entries(faiss_store):
     entries = []
     if faiss_store and hasattr(faiss_store, "index_to_docstore_id"):
@@ -109,8 +107,7 @@ def get_all_entries(faiss_store):
                 pass
     return entries
 
-# ----------------------------- Full Preprocessing Pipeline (CORRECTED) -----------------------------
-# ----------------------------- Full Preprocessing Pipeline (CORRECTED) -----------------------------
+
 def features_from_uploaded_image(img_array):
     gray = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
     clahe_img = apply_clahe(gray)
@@ -127,7 +124,7 @@ def features_from_uploaded_image(img_array):
         # --- ADJUST THE WEIGHT HERE ---
         # A value of 1.0 gives equal importance.
         # A value > 1.0 gives LBP more importance.
-        lbp_weight = 2.0# ✅ Make LBP twice as important
+        lbp_weight = 2.0# Make LBP twice as important
         
         
         # 1. Normalize LBP vector (as before)
@@ -138,7 +135,7 @@ def features_from_uploaded_image(img_array):
         hog_feat = hog_feat.astype("float32")
         hog_feat /= (np.linalg.norm(hog_feat) + 1e-6)
 
-        # 3. ✅ APPLY THE WEIGHT TO THE LBP VECTOR
+        # 3. APPLY THE WEIGHT TO THE LBP VECTOR
         weighted_lbp_hist = lbp_hist * lbp_weight
         
         # 4. Concatenate the weighted LBP and the original HOG vector
@@ -147,7 +144,7 @@ def features_from_uploaded_image(img_array):
     else:
         return None
 
-# ----------------------------- Streamlit UI -----------------------------
+# Streamlit UI 
 st.set_page_config(page_title="Face Biometric System (LBP+HOG)", layout="centered")
 st.title("Face Biometric System (LBP + HOG)")
 
@@ -155,7 +152,7 @@ st.title("Face Biometric System (LBP + HOG)")
 mode = st.radio("Select Mode:", ["Register New Face", "Identify Face (1:N)", "Delete Registered Face"])
 
 embedding_model = PrecomputedEmbedding()
-# ✅ FIX 3: Changed path to reflect new feature vectors
+# FIX 3: Changed path to reflect new feature vectors
 faiss_path = "combined_faiss_index" 
 
 # Load existing FAISS index if available
@@ -170,7 +167,7 @@ else:
 
 uploaded_file = st.file_uploader("Upload a face image", type=["jpg", "jpeg", "png"])
 
-# ----------------------------- Registration -----------------------------
+# Registration
 if mode == "Register New Face":
     name = st.text_input("👤 Enter person's name")
     if uploaded_file and name:
@@ -201,9 +198,9 @@ if mode == "Register New Face":
                 faiss_store.save_local(faiss_path)
                 st.success(f"**{name}** registered successfully with ID: `{person_id}`")
             else:
-                st.error("⚠️ No face detected. Please upload a clear face image.")
+                st.error("No face detected. Please upload a clear face image.")
 
-# ----------------------------- Identification (1:N) -----------------------------
+#  Identification (1:N) 
 elif mode == "Identify Face (1:N)":
     if faiss_store is None:
         st.error("No database found. Please register faces first.")
@@ -227,7 +224,7 @@ elif mode == "Identify Face (1:N)":
 
                     # NOTE: You will need to re-evaluate this threshold for the new LBP+HOG vectors
                     if similarity >= 55: 
-                        st.subheader("✅ Match Found")
+                        st.subheader(" Match Found")
                         st.success(f"**Name:** {doc.metadata['name']}")
                         st.info(f"**ID:** {doc.metadata['id']}")
                         st.info(f"**Similarity Score:** {similarity:.2f}%")
@@ -244,16 +241,16 @@ elif mode == "Identify Face (1:N)":
 
 
 
-# ----------------------------- Deletion -----------------------------
+# Deletion 
 elif mode == "Delete Registered Face":
     if faiss_store is None:
         st.error(" No FAISS index found. Register faces first.")
     else:
         st.subheader(" Delete Person by ID")
 
-        # --- NEW MESSAGE ---
+        
         st.info("Enter the exact 8-character ID of the person you wish to delete. This action is irreversible.")
-        # --- END NEW MESSAGE ---
+       
 
         entries = get_all_entries(faiss_store)
         if not entries:
