@@ -10,12 +10,11 @@ import uuid
 import os
 import shutil
 
-# ----------------------------- CLAHE -----------------------------
 def apply_clahe(image):
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
     return clahe.apply(image)
 
-# ----------------------------- Retinex -----------------------------
+
 def apply_retinex(image):
     image = image.astype(np.float32) + 1.0
     gaussian = cv2.GaussianBlur(image, (101, 101), 30)
@@ -23,7 +22,7 @@ def apply_retinex(image):
     retinex = cv2.normalize(retinex, None, 0, 255, cv2.NORM_MINMAX)
     return np.uint8(retinex)
 
-# ----------------------------- Face Detection -----------------------------
+#  Face Detection
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
 
 def detect_and_crop_face(img):
@@ -33,7 +32,7 @@ def detect_and_crop_face(img):
     (x, y, w, h) = faces[0]
     return img[y:y+h, x:x+w]
 
-# ----------------------------- ENHANCED LBP Extraction -----------------------------
+#  ENHANCED LBP Extraction 
 def extract_lbp_from_cropped_face(cropped, grid_x=8, grid_y=8):
     """
     Extracting  a spatially enhanced LBP feature vector from a cropped face image.
@@ -89,14 +88,14 @@ def extract_lbp_from_cropped_face(cropped, grid_x=8, grid_y=8):
     
     return final_hist
 
-# ----------------------------- Custom Embedding Wrapper -----------------------------
+# Custom Embedding Wrapper
 class PrecomputedEmbedding(Embeddings):
     def embed_documents(self, texts):
         return []
     def embed_query(self, text):
         return []
 
-# ----------------------------- Similarity Conversion -----------------------------
+#Similarity Conversion
 def l2_to_similarity(distance, max_distance=2.0):
     similarity = max(0.0, 1 - (distance / max_distance))
     similarity = (similarity-.999)*1000
@@ -106,7 +105,7 @@ def verification_Normalization(distance, max_distance=2.0):
     similarity = max(0.0, 1 - (distance / max_distance))
     return similarity * 100
 
-# ✅ Utility function to get all stored metadata
+# Utility function to get all stored metadata
 def get_all_entries(faiss_store):
     entries = []
     if faiss_store and hasattr(faiss_store, "index_to_docstore_id"):
@@ -119,7 +118,7 @@ def get_all_entries(faiss_store):
                 pass
     return entries
 
-# ----------------------------- Full Preprocessing Pipeline -----------------------------
+# Full Preprocessing Pipeline
 def histogram_from_uploaded_image(img_array):
     gray = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
     clahe_img = apply_clahe(gray)
@@ -129,7 +128,7 @@ def histogram_from_uploaded_image(img_array):
     hist = extract_lbp_from_cropped_face(cropped_face)
     return hist
 
-# ----------------------------- Streamlit UI -----------------------------
+#  Streamlit UI
 st.set_page_config(page_title="Face Skin Luminescence Biometric System", layout="centered")
 st.title("Face Skin Luminescence Biometric")
 
@@ -151,7 +150,7 @@ else:
 
 uploaded_file = st.file_uploader("Upload a face image", type=["jpg", "jpeg", "png"])
 
-# ----------------------------- Registration -----------------------------
+# Registration
 if mode == "Register New Face":
     name = st.text_input("👤 Enter person's name")
     if uploaded_file and name:
@@ -184,7 +183,7 @@ if mode == "Register New Face":
             else:
                 st.error("⚠️ No face detected. Please upload a clear face image.")
 
-# ----------------------------- Identification (1:N) -----------------------------
+# Identification (1:N)
 elif mode == "Identify Face":
     if faiss_store is None:
         st.error("No FAISS database found. Please register some faces first.")
@@ -220,7 +219,7 @@ elif mode == "Identify Face":
             else:
                 st.error("No face detected in the image.")
 
-# ----------------------------- Verification (1:1) - NEW SECTION -----------------------------
+# Verification (1:1) - NEW SECTION 
 elif mode == "Verify Face (1:1)":
     if faiss_store is None:
         st.error("No FAISS database found. Please register some faces first.")
@@ -274,7 +273,7 @@ elif mode == "Verify Face (1:1)":
                         else:
                             st.error("Could not locate the vector for the given ID in the FAISS index.")
 
-# ----------------------------- Deletion -----------------------------
+# Deletion -
 elif mode == "Delete Registered Face":
     if faiss_store is None:
         st.error("No FAISS index found. Register faces first.")
